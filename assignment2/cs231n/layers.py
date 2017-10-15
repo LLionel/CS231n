@@ -35,7 +35,8 @@ def affine_forward(x, w, b):
     return out, cache
 
 
-def affine_backward(dout, cache):
+def affine_backward(dout, ca            #dropout. NOTE:not complete
+che):
     """
     Computes the backward pass for an affine layer.
 
@@ -139,9 +140,9 @@ def batchnorm_forward(x, gamma, beta, bn_param):
 
     Input:
     - x: Data of shape (N, D)
-    - gamma: Scale parameter of shape (D,)nning_mean']
+    - gamma: Scale parameter of shape (D,)
         running_var = bn_param['running_var']
-        out = gamma * (x-running_me
+        out = gamma * (x-running_me)
     - beta: Shift paremeter of shape (D,)
     - bn_param: Dictionary with the following keys:
       - mode: 'train' or 'test'; required
@@ -511,8 +512,9 @@ def conv_backward_naive(dout, cache):
             for j in range(0, W-WW+1,stride):
                 x_t = x[n, :, i:i+HH, j:j+WW]
                 for k in range(F):
-                    dw[k,: , :, :] += dout[n,k,i,j]*x_t
-                    dx[n,:,i:i+HH,j:j+WW] += dout[n,k,i,j]*w[k]
+                    #print(j,dout[n,k,i,j])
+                    dw[k,: , :, :] += dout[n,k,i//stride,j//stride]*x_t
+                    dx[n,:,i:i+HH,j:j+WW] += dout[n,k,i//stride,j//stride]*w[k]
                     
     dx = dx[:, :, pad:-pad, pad:-pad]
     db = np.sum(dout, axis=(3,2,0))
@@ -602,8 +604,7 @@ def max_pool_backward_naive(dout, cache):
                     #print(indices)
                     dx[n,k,i+index//pool_width,j+index%pool_width] = dout[n,k,i//stride,j//stride]
                     
-    a = np.array([[1,2,3],[4,5,6],[7,8,9]])
-    print(a[5])
+    
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -633,7 +634,6 @@ def spatial_batchnorm_forward(x, gamma, beta, bn_param):
     - cache: Values needed for the backward pass
     """
     out, cache = None, None
-
     ###########################################################################
     # TODO: Implement the forward pass for spatial batch normalization.       #
     #                                                                         #
@@ -641,7 +641,10 @@ def spatial_batchnorm_forward(x, gamma, beta, bn_param):
     # version of batch normalization defined above. Your implementation should#
     # be very short; ours is less than five lines.                            #
     ###########################################################################
-    pass
+    N,C,H,W = x.shape
+    x_t = x.transpose(0,2,3,1).reshape(N*H*W,C)
+    x_t, cache = batchnorm_forward(x_t, gamma, beta, bn_param)
+    out = x_t.reshape(N,H,W,C).transpose(0,3,1,2)
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -671,7 +674,10 @@ def spatial_batchnorm_backward(dout, cache):
     # version of batch normalization defined above. Your implementation should#
     # be very short; ours is less than five lines.                            #
     ###########################################################################
-    pass
+    N, C, H, W = dout.shape
+    dout_t = dout.transpose(0,2,3,1).reshape(N*H*W, C)
+    dx, dgamma, dbeta = batchnorm_backward_alt(dout_t,cache)
+    dx = dx.reshape(N,H,W,C).transpose(0,3,1,2)
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################

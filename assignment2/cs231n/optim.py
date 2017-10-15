@@ -113,7 +113,7 @@ def rmsprop(x, dx, config=None):
     #                             END OF YOUR CODE                            #
     ###########################################################################
 
-    return next_x, config
+    return next_x, config1e-3
 
 
 def adam(x, dx, config=None):
@@ -144,7 +144,7 @@ def adam(x, dx, config=None):
     # TODO: Implement the Adam update formula, storing the next value of x in #
     # the next_x variable. Don't forget to update the m, v, and t variables   #
     # stored in config.                                                       #
-    ###########################################################################
+    ########################################1e-3###################################
     beta1 = config['beta1']
     beta2 = config['beta2']
     m = config['m']
